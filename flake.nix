@@ -53,6 +53,10 @@
               "-w"
               "-extldflags -static"
             ];
+            # Ensure the markdown file is included
+            postBuild = ''
+              cp ${./path/to/your/markdown/file.md} $out/
+            '';
           };
         });
 
