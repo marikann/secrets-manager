@@ -7,27 +7,26 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v2
 
-      - uses: cachix/install-nix-action@v25
+      - name: Set up Go
+        uses: actions/setup-go@v3
         with:
-          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          go-version: '1.20'
 
-      - uses: DeterminateSystems/magic-nix-cache-action@v3
+      - name: Run Tests
+        run: go test -v -coverprofile=coverage.out ./...
 
-      - name: Test
-        run: nix develop --command xc test-cover
-
-      - name: Copy coverage.out to temp
-        run: cp coverage.out $RUNNER_TEMP
-
-      - name: Update coverage report
-        uses: ncruces/go-coverage-report@57ac6f0f19874f7afbab596105154f08004f482e
+      - name: Upload coverage to Wiki
+        uses: ncruces/go-coverage-report@v0
         with:
-          coverage-file: ${{ runner.temp }}/coverage.out
-          report: 'true'
-          chart: 'true'
-          reuse-go: 'true'
-        if: |
-          github.event_name == 'push'
+          coverage: coverage.out
+          wiki: true
+
+      - name: Upload Coverage Badge
+        uses: ncruces/go-coverage-report@v0
+        with:
+          coverage: coverage.out
+          badge: true
